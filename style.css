@@ -211,3 +211,7 @@ h5 {
 .response-container {
 	margin: 10px;
 }
+
+.form-control {
+	width: 200px;
+}

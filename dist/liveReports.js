@@ -77,6 +77,7 @@ async function getCoinData(coins) {
     Object.entries(data).forEach((coinEntry) => extractedData.push({ coinName: coinEntry[0], date: new Date(), values: coinEntry[1] }));
     return data;
 }
+responseEl.innerHTML = '';
 async function checkIfcoinExist(toggledCards) {
     for (let i = 0; i < toggledCards.length; i++) {
         const response = await fetch(`https://min-api.cryptocompare.com/data/price?fsym=${toggledCards[i]}&tsyms=USD,ILS,EUR`);
@@ -86,7 +87,6 @@ async function checkIfcoinExist(toggledCards) {
             responseEl.classList.add('response-el');
             let responseContent = document.createElement('div');
             responseContent.classList.add('response-container');
-            responseEl.innerHTML = '';
             responseContent.innerText = `${toggledCards[i]} doesnt have live currency `;
             responseEl.appendChild(responseContent);
             responseDiv.appendChild(responseEl);
