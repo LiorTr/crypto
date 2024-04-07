@@ -1,7 +1,6 @@
 "use strict";
 let dataCoinsArr = [];
 let responseDiv = document.querySelector('.response-coin');
-let responseEl = document.createElement('div');
 function createCoinData(coinData) {
     let dataPoints = [];
     if (coinData[0]) {
@@ -77,19 +76,16 @@ async function getCoinData(coins) {
     Object.entries(data).forEach((coinEntry) => extractedData.push({ coinName: coinEntry[0], date: new Date(), values: coinEntry[1] }));
     return data;
 }
-responseEl.innerHTML = '';
 async function checkIfcoinExist(toggledCards) {
     for (let i = 0; i < toggledCards.length; i++) {
         const response = await fetch(`https://min-api.cryptocompare.com/data/price?fsym=${toggledCards[i]}&tsyms=USD,ILS,EUR`);
         const responseJson = await response.json();
         console.log(responseJson);
         if (responseJson.Response === 'Error') {
-            responseEl.classList.add('response-el');
             let responseContent = document.createElement('div');
             responseContent.classList.add('response-container');
             responseContent.innerText = `${toggledCards[i]} doesnt have live currency `;
-            responseEl.appendChild(responseContent);
-            responseDiv.appendChild(responseEl);
+            responseDiv.appendChild(responseContent);
         }
     }
 }

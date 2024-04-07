@@ -252,6 +252,7 @@ home?.addEventListener('click', function () {
     uploadCoins();
 });
 liveReports?.addEventListener('click', function () {
+    responseDiv.innerHTML = '';
     chartDisplay.style.display = 'block';
     allCoins.innerHTML = '';
     if (toggledCards.length === 0) {
@@ -265,6 +266,7 @@ liveReports?.addEventListener('click', function () {
     }
     else {
         renderChart(toggledCards);
+        responseDiv.innerHTML = '';
     }
 });
 function changeCoin(toggledCards, card) {
