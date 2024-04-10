@@ -62,7 +62,9 @@ async function renderChart(toggledCards) {
             updatedData.forEach((data, index) => {
                 chart.options.data[index].dataPoints.push(...data.dataPoints);
             });
-            chart.render();
+            {
+                chart.render();
+            }
         }, 2000);
     }
     catch (error) {

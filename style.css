@@ -75,6 +75,7 @@ h5 {
 }
 
 .container-change-element {
+	border-radius: 15px;
 	position: absolute;
 	width: 400px;
 	height: 500px;
@@ -214,4 +215,32 @@ h5 {
 
 .form-control {
 	width: 200px;
+}
+
+.pagination {
+	margin: 0px 50px;
+	display: flex;
+	flex-wrap: wrap;
+	word-wrap: break-word;
+	color: #0d6efd;
+	--parallax-speed: 23;
+	animation: parallax linear;
+	animation-timeline: scroll();
+}
+
+.page-link {
+	margin: 0px 4px;
+	border: #666 1px solid;
+}
+
+.overlay {
+	z-index: 10;
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: 100vh;
+	display: flex;
+	align-items: center;
+	justify-content: center;
 }

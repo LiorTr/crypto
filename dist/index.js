@@ -1,6 +1,7 @@
 "use strict";
 let btnClick = document.querySelector('.btn-primary');
 let allCoins = document.querySelector('.all-coins');
+let wrapperElement = document.querySelector('.wrapper');
 let COINS_FETCH_TIME = 'coinsFetchTime';
 let about = document.querySelector('.about');
 let home = document.querySelector('.home');
@@ -13,7 +14,12 @@ let chartDisplay = document.querySelector('#chartContainer');
 let searchInput = document.querySelector('.form-control');
 let searchBtn = document.querySelector('.btn-outline-success');
 let switchedCoin;
+let page = 1;
+let skip = 0;
+let paginationContainer = document.querySelector('.pagination');
+let currentPage;
 function uploadCoins() {
+    skip = 25 * (page - 1);
     if (localStorage[COINS_FETCH_TIME]) {
         let coinsfetchedtime = new Date(localStorage[COINS_FETCH_TIME]);
         let currentTime = new Date();
@@ -23,19 +29,54 @@ function uploadCoins() {
         if (timeDiff > coinsRefreshTimeLimit) {
             (async () => {
                 let coins = await getAllCoins();
-                createCoins(coins);
+                clearAllCoins();
+                createCoins(coins, skip);
+                renderPagination(coins);
             })();
         }
         else {
             let coins = JSON.parse(localStorage['allCoins']);
-            createCoins(coins);
+            clearAllCoins();
+            createCoins(coins, skip);
+            renderPagination(coins);
         }
     }
     else {
         (async () => {
             let coins = await getAllCoins();
-            createCoins(coins);
+            clearAllCoins();
+            createCoins(coins, skip);
+            renderPagination(coins);
         })();
+    }
+}
+function clearAllCoins() {
+    allCoins.innerHTML = '';
+}
+function renderPagination(coins) {
+    const totalPages = Math.ceil(coins.length / 25);
+    if (paginationContainer) {
+        paginationContainer.innerHTML = '';
+        const paginationList = document.createElement('ul');
+        paginationList.classList.add('pagination');
+        for (let i = 1; i <= totalPages; i++) {
+            const pageItem = document.createElement('li');
+            pageItem.classList.add('page-item');
+            const pageLink = document.createElement('a');
+            pageLink.classList.add('page-link');
+            pageLink.href = '#';
+            pageLink.textContent = i.toString();
+            pageLink.addEventListener('click', () => {
+                page = i;
+                uploadCoins();
+            });
+            pageItem.appendChild(pageLink);
+            paginationList.appendChild(pageItem);
+        }
+        paginationContainer.appendChild(paginationList);
+    }
+    else {
+        console.error('Pagination container not found.');
     }
 }
 uploadCoins();
@@ -192,8 +233,8 @@ function toggleCard(card) {
         }
     }
 }
-async function createCoins(coins) {
-    let hunderdCoins = coins.slice(0, 100);
+async function createCoins(coins, skip) {
+    let hunderdCoins = coins.slice(skip, skip + 25);
     hunderdCoins.forEach((coin) => {
         let card = renderCard(coin);
         editCardText(card, coin);
@@ -243,19 +284,24 @@ async function moreInfo(coin, card) {
 }
 about?.addEventListener('click', function () {
     allCoins.innerHTML = '';
-    chartDisplay.style.display = 'none';
     allCoins.appendChild(ElementAbout);
+    paginationContainer.style.display = 'none';
+    responseDiv.style.display = 'none';
 });
 home?.addEventListener('click', function () {
     allCoins.innerHTML = '';
+    paginationContainer.style.display = 'flex';
     chartDisplay.style.display = 'none';
+    responseDiv.style.display = 'none';
     uploadCoins();
 });
 liveReports?.addEventListener('click', function () {
     responseDiv.innerHTML = '';
+    paginationContainer.style.display = 'none';
     chartDisplay.style.display = 'block';
     allCoins.innerHTML = '';
     if (toggledCards.length === 0) {
+        chartDisplay.style.display = 'none';
         let divImageLogo = document.createElement('div');
         let textLogoPlease = document.createElement('h2');
         divImageLogo.classList.add('div-logo-please');
@@ -272,14 +318,17 @@ liveReports?.addEventListener('click', function () {
 function changeCoin(toggledCards, card) {
     console.log('changeCoin', card);
     let specificCard = card;
+    let overlay = document.createElement('div');
     let ContainerChangeElement = document.createElement('div');
     let headerChangeElement = document.createElement('h1');
     ContainerChangeElement.classList.add('container-change-element');
     headerChangeElement.classList.add('header-change-element');
     headerChangeElement.innerText = 'Change coin';
-    allCoins.appendChild(ContainerChangeElement);
+    overlay.appendChild(ContainerChangeElement);
+    wrapperElement.appendChild(overlay);
     ContainerChangeElement.appendChild(headerChangeElement);
     toggledCards.forEach((card) => {
+        overlay.classList.add('overlay');
         let cardContainer = document.createElement('div');
         cardContainer.classList.add('card-container-change-element');
         cardContainer.classList.add('card');
@@ -292,9 +341,32 @@ function changeCoin(toggledCards, card) {
         cardContainer.appendChild(cardName);
         cardContainer.appendChild(cardBtn);
         ContainerChangeElement.appendChild(cardContainer);
+        ContainerChangeElement.addEventListener('click', (event) => event.stopPropagation());
         cardBtn.addEventListener('click', function () {
-            changeInputCheckbox(cardName, specificCard, ContainerChangeElement);
+            changeInputCheckbox(cardName, specificCard, overlay);
         });
+    });
+    overlay.addEventListener('click', (event) => {
+        if (event.target !== ContainerChangeElement) {
+            let allCardsPrinted = allCoins.querySelectorAll('.card-body');
+            let allCardsNames = allCoins.querySelectorAll('.card-title');
+            let cardNameOfAll = [];
+            for (let i = 0; i < allCardsPrinted.length; i++) { }
+            allCardsNames.forEach((card) => {
+                cardNameOfAll.push(card.innerHTML);
+            });
+            indexOfCard = cardNameOfAll.indexOf(switchedCoin);
+            allCardsPrinted.forEach((cardBody, index) => {
+                let inputCheckbox = cardBody.querySelector('input[type="checkbox"]');
+                let cardTitle = cardBody.querySelector('h5');
+                if (index === indexOfCard)
+                    if (inputCheckbox && cardTitle) {
+                        inputCheckbox.checked = false;
+                        cardTitle.style.backgroundColor = 'white';
+                    }
+            });
+            wrapperElement.removeChild(overlay);
+        }
     });
 }
 searchBtn.addEventListener('click', function () {
@@ -356,5 +428,5 @@ function changeInputCheckbox(cardName, card, moduleContainer) {
     });
     indexOfCard = 0;
     switchedCoin = '';
-    allCoins.removeChild(moduleContainer);
+    wrapperElement.removeChild(moduleContainer);
 }
